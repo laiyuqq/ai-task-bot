@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台 · AI任务中台</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #4f6df5; --primary-dark: #3b56d4;
+  --bg: #f0f2f5; --border: #e5e7eb; --text: #1a1a2e; --text-light: #6b7280;
+}
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.topbar { background: linear-gradient(135deg, #4f6df5, #6d5df5); color: #fff; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.topbar h1 { font-size: 18px; }
+.topbar a { color: #fff; text-decoration: none; font-size: 13px; opacity: 0.9; }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Tab */
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+.tab { padding: 10px 24px; background: #fff; border: 1px solid var(--border); border-radius: 10px 10px 0 0; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-light); border-bottom: none; transition: all 0.2s; }
+.tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* 统计卡片 */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.stat-card .num { font-size: 32px; font-weight: 800; color: var(--primary); }
+.stat-card .label { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+
+/* 工具栏 */
+.toolbar { background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.toolbar select, .toolbar input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; }
+.toolbar input { width: 180px; }
+.btn { padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+.btn-export { background: #22c55e; color: #fff; }
+.btn-export:hover { background: #16a34a; }
+.btn-refresh { background: #f3f4f6; color: var(--text); }
+.btn-refresh:hover { background: #e5e7eb; }
+.btn-add { background: var(--primary); color: #fff; }
+.btn-add:hover { background: var(--primary-dark); }
+
+/* 表格 */
+.table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+table { width: 100%; border-collapse: collapse; }
+th { background: #f9fafb; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 700; color: var(--text-light); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+tr:hover td { background: #f9fafb; }
+td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
+
+/* 状态/类型标签 */
+.tag { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.tag-待处理 { background: #fef3c7; color: #92400e; }
+.tag-处理中 { background: #dbeafe; color: #1e40af; }
+.tag-已完成 { background: #d1fae5; color: #065f46; }
+.tag-已关闭 { background: #f3f4f6; color: #6b7280; }
+.type-tag { padding: 2px 8px; border-radius: 8px; font-size: 12px; }
+.type-咨询 { background: #e0e7ff; color: #4338ca; }
+.type-需求 { background: #fce7f3; color: #9d174d; }
+.type-bug { background: #fee2e2; color: #991b1b; }
+.type-建议 { background: #ccfbf1; color: #115e59; }
+.type-开通试用 { background: #f3e8ff; color: #6b21a8; }
+.cat-tag { padding: 2px 8px; border-radius: 8px; font-size: 12px; background: #f0f9ff; color: #0369a1; }
+
+/* 操作按钮 */
+.op-btn { background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-right: 4px; }
+.op-btn:hover { border-color: var(--primary); color: var(--primary); }
+.op-btn.del:hover { border-color: #ef4444; color: #ef4444; }
+.empty { text-align: center; padding: 60px 20px; color: var(--text-light); }
+
+/* 弹窗 */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: #fff; border-radius: 16px; width: 560px; max-width: 92vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h2 { font-size: 17px; }
+.modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-light); padding: 4px 8px; }
+.modal-body { padding: 20px 24px; }
+.form-row { margin-bottom: 16px; }
+.form-row label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.form-row label .hint { font-weight: 400; color: var(--text-light); font-size: 12px; }
+.req { color: #ef4444; }
+.form-row input, .form-row select, .form-row textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s; }
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--primary); }
+.form-row textarea { resize: vertical; }
+.form-tip { font-size: 13px; color: #ef4444; min-height: 18px; }
+.form-tip.success { color: #22c55e; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+.btn-cancel { background: #f3f4f6; border: none; padding: 9px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; color: var(--text-light); }
+.btn-submit { background: var(--primary); color: #fff; border: none; padding: 9px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
+.btn-submit:hover { background: var(--primary-dark); }
+.btn-submit:disabled { background: #a5b4fc; }
+
+@media (max-width: 768px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 16px; }
+  td.desc { max-width: 200px; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>📋 管理后台 · AI任务中台</h1>
+  <a href="/">← 返回Bot</a>
+</div>
+
+<div class="container">
+  <!-- Tab 切换 -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('req')">📝 需求管理</div>
+    <div class="tab" onclick="switchTab('kb')">📚 知识库管理</div>
+  </div>
+
+  <!-- ===== 需求管理 ===== -->
+  <div class="tab-content active" id="tab-req">
+    <div class="stats" id="stats"></div>
+    <div class="toolbar">
+      <input type="text" id="filterOrg" placeholder="筛选机构名称…" oninput="loadData()">
+      <select id="filterType" onchange="loadData()">
+        <option value="">全部类型</option>
+        <option value="咨询">咨询</option><option value="需求">需求</option>
+        <option value="bug">问题/异常</option><option value="建议">建议</option><option value="开通试用">开通试用</option>
+      </select>
+      <select id="filterStatus" onchange="loadData()">
+        <option value="">全部状态</option>
+        <option value="待处理">待处理</option><option value="处理中">处理中</option>
+        <option value="已完成">已完成</option><option value="已关闭">已关闭</option>
+      </select>
+      <button class="btn btn-export" onclick="exportExcel()">⬇ 导出Excel</button>
+      <button class="btn btn-refresh" onclick="loadData()">🔄 刷新</button>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>序号</th><th>时间</th><th>机构</th><th>联系人</th>
+        <th>类型</th><th>描述</th><th>补充</th><th>状态</th><th>操作</th>
+      </tr></thead><tbody id="tbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ===== 知识库管理 ===== -->
+  <div class="tab-content" id="tab-kb">
+    <div class="toolbar">
+      <input type="text" id="kbSearch" placeholder="搜索问题或关键词…" oninput="loadKB()">
+      <button class="btn btn-add" onclick="openKbModal()">➕ 新增问答</button>
+      <button class="btn btn-refresh" onclick="loadKB()">🔄 刷新</button>
+      <span style="margin-left:auto;color:var(--text-light);font-size:13px" id="kbCount"></span>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>序号</th><th>分类</th><th>问题</th><th>关键词</th><th>答案预览</th><th>操作</th>
+      </tr></thead><tbody id="kbTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 知识库编辑弹窗 ===== -->
+<div class="modal-mask" id="kbModal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="kbModalTitle">新增问答</h2>
+      <button class="modal-close" onclick="closeKbModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>问题 <span class="req">*</span></label>
+        <input type="text" id="kbQuestion" placeholder="例如：话术生成准确吗？">
+      </div>
+      <div class="form-row">
+        <label>分类</label>
+        <input type="text" id="kbCategory" placeholder="如：核心能力、使用指南、开通与反馈…" value="其他">
+      </div>
+      <div class="form-row">
+        <label>关键词 <span class="hint">（逗号分隔，Bot 靠这些词匹配用户提问）</span></label>
+        <input type="text" id="kbKeywords" placeholder="话术,准确,准确率,生成质量">
+      </div>
+      <div class="form-row">
+        <label>答案 <span class="req">*</span></label>
+        <textarea id="kbAnswer" rows="5" placeholder="输入这条问答的回复内容，支持换行"></textarea>
+      </div>
+      <div class="form-tip" id="kbFormTip"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeKbModal()">取消</button>
+      <button class="btn-submit" id="kbSubmitBtn" onclick="saveKb()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Tab 切换 ===== */
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
+  document.getElementById("tab-" + name).classList.add("active");
+  if (name === "kb") loadKB();
+}
+
+/* ===== 需求管理 ===== */
+async function loadData() {
+  const org = document.getElementById("filterOrg").value;
+  const type = document.getElementById("filterType").value;
+  const status = document.getElementById("filterStatus").value;
+  let url = "/api/requests?";
+  if (org) url += "org=" + encodeURIComponent(org) + "&";
+  if (type) url += "type=" + encodeURIComponent(type) + "&";
+  if (status) url += "status=" + encodeURIComponent(status);
+  const res = await fetch(url);
+  const data = await res.json();
+  const tbody = document.getElementById("tbody");
+  if (!data.ok || data.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">暂无需求记录</td></tr>';
+  } else {
+    tbody.innerHTML = data.data.map((r, i) => `
+      <tr>
+        <td>${i+1}</td><td>${r.time}</td><td>${esc(r.org)}</td><td>${esc(r.contact)}</td>
+        <td><span class="type-tag type-${esc(r.type)}">${esc(r.type)}</span></td>
+        <td class="desc">${esc(r.description)}</td><td class="desc">${esc(r.extra||"-")}</td>
+        <td><span class="tag tag-${esc(r.status)}">${esc(r.status)}</span></td>
+        <td><button class="op-btn" onclick="cycleStatus('${r.id}','${r.status}')">改状态</button><button class="op-btn del" onclick="del('${r.id}')">删除</button></td>
+      </tr>`).join("");
+  }
+  loadStats();
+}
+async function loadStats() {
+  const res = await fetch("/api/stats");
+  const data = await res.json();
+  if (!data.ok) return;
+  const pending = data.by_status["待处理"]||0;
+  const done = (data.by_status["已完成"]||0)+(data.by_status["已关闭"]||0);
+  const orgCount = Object.keys(data.by_org).length;
+  document.getElementById("stats").innerHTML = `
+    <div class="stat-card"><div class="num">${data.total}</div><div class="label">需求总数</div></div>
+    <div class="stat-card"><div class="num">${pending}</div><div class="label">待处理</div></div>
+    <div class="stat-card"><div class="num">${orgCount}</div><div class="label">涉及机构数</div></div>
+    <div class="stat-card"><div class="num">${done}</div><div class="label">已处理完成</div></div>`;
+}
+async function cycleStatus(id,current){const flow=["待处理","处理中","已完成","已关闭"];const next=flow[(flow.indexOf(current)+1)%flow.length];await fetch(`/api/requests/${id}/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:next})});loadData();}
+async function del(id){if(!confirm("确认删除？"))return;await fetch(`/api/requests/${id}`,{method:"DELETE"});loadData();}
+function exportExcel(){window.location.href="/api/export_excel";}
+
+/* ===== 知识库管理 ===== */
+let kbData = [];
+let editingKbId = null;
+
+async function loadKB() {
+  const res = await fetch("/api/kb");
+  const data = await res.json();
+  if (!data.ok) return;
+  kbData = data.faq;
+  renderKB();
+}
+function renderKB() {
+  const search = document.getElementById("kbSearch").value.toLowerCase();
+  const tbody = document.getElementById("kbTbody");
+  let filtered = kbData;
+  if (search) {
+    filtered = kbData.filter(f =>
+      f.question.toLowerCase().includes(search) ||
+      (f.keywords||[]).join(",").toLowerCase().includes(search) ||
+      f.answer.toLowerCase().includes(search)
+    );
+  }
+  document.getElementById("kbCount").textContent = `共 ${filtered.length} 条`;
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无知识库条目</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((f, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><span class="cat-tag">${esc(f.category||"-")}</span></td>
+      <td>${esc(f.question)}</td>
+      <td class="desc">${esc((f.keywords||[]).join("、"))}</td>
+      <td class="desc">${esc(f.answer).substring(0,80)}${f.answer.length>80?"…":""}</td>
+      <td>
+        <button class="op-btn" onclick="openKbModal('${f.id}')">编辑</button>
+        <button class="op-btn del" onclick="delKb('${f.id}')">删除</button>
+      </td>
+    </tr>`).join("");
+}
+
+function openKbModal(id) {
+  editingKbId = id || null;
+  document.getElementById("kbModalTitle").textContent = id ? "编辑问答" : "新增问答";
+  document.getElementById("kbFormTip").textContent = "";
+  document.getElementById("kbFormTip").className = "form-tip";
+  if (id) {
+    const item = kbData.find(f => f.id === id);
+    if (item) {
+      document.getElementById("kbQuestion").value = item.question;
+      document.getElementById("kbCategory").value = item.category || "其他";
+      document.getElementById("kbKeywords").value = (item.keywords||[]).join("，");
+      document.getElementById("kbAnswer").value = item.answer;
+    }
+  } else {
+    document.getElementById("kbQuestion").value = "";
+    document.getElementById("kbCategory").value = "其他";
+    document.getElementById("kbKeywords").value = "";
+    document.getElementById("kbAnswer").value = "";
+  }
+  document.getElementById("kbModal").style.display = "flex";
+}
+function closeKbModal() { document.getElementById("kbModal").style.display = "none"; }
+
+async function saveKb() {
+  const question = document.getElementById("kbQuestion").value.trim();
+  const category = document.getElementById("kbCategory").value.trim();
+  const keywords = document.getElementById("kbKeywords").value.trim();
+  const answer = document.getElementById("kbAnswer").value.trim();
+  const tip = document.getElementById("kbFormTip");
+  if (!question) { tip.textContent = "请填写问题"; return; }
+  if (!answer) { tip.textContent = "请填写答案"; return; }
+
+  const btn = document.getElementById("kbSubmitBtn");
+  btn.disabled = true; btn.textContent = "保存中…";
+
+  try {
+    const url = editingKbId ? `/api/kb/${editingKbId}` : "/api/kb";
+    const method = editingKbId ? "PUT" : "POST";
+    const res = await fetch(url, {
+      method, headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, category, keywords, answer })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      closeKbModal();
+      await loadKB();
+    } else {
+      tip.textContent = "保存失败：" + (data.error || "未知错误");
+    }
+  } catch(e) { tip.textContent = "网络异常"; }
+  btn.disabled = false; btn.textContent = "保存";
+}
+
+async function delKb(id) {
+  if (!confirm("确认删除这条问答？删除后Bot将不再回答此问题。")) return;
+  await fetch(`/api/kb/${id}`, { method: "DELETE" });
+  loadKB();
+}
+
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+loadData();
+</script>
+</body>
+</html>

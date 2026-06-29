@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI任务中台 · 推广支持Bot</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app">
+  <!-- 侧边/顶部品牌 -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AI</div>
+      <div class="brand-text">
+        <h1>AI任务中台 · 推广支持Bot</h1>
+        <p>问答咨询 · 需求反馈 · 一站直达</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="status-dot"></span><span class="status-text">在线</span>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- 聊天区 -->
+    <section class="chat-area" id="chatArea">
+      <div class="messages" id="messages">
+        <!-- 欢迎消息 -->
+        <div class="msg bot">
+          <div class="avatar bot-avatar">AI</div>
+          <div class="bubble">
+            <p>您好！我是 <b>AI任务中台推广支持Bot</b>，很高兴为您服务 👋</p>
+            <p>您可以问我关于 AI任务中台的任何问题，比如：</p>
+            <ul>
+              <li>AI任务中台是什么？能解决什么问题？</li>
+              <li>包含哪些能力？哪些场景已经跑通了？</li>
+              <li>机构需要怎么配合？使用后能看到哪些数据？</li>
+              <li>怎么开通试用？反馈机制是怎样的？</li>
+            </ul>
+            <p>如果您有具体需求或遇到了问题，也可以点击下方 <b>「我要提需求」</b> 直接反馈，项目经理赖雨晴会跟进处理。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷问题 -->
+      <div class="quick-bar" id="quickBar"></div>
+
+      <!-- 输入区 -->
+      <div class="input-area">
+        <button class="btn-feedback" id="btnFeedback">📝 我要提需求</button>
+        <div class="input-row">
+          <input type="text" id="input" placeholder="输入您的问题，回车发送…" autocomplete="off">
+          <button id="sendBtn" class="btn-send">发送</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 反馈表单（弹层） -->
+    <div class="modal-mask" id="feedbackModal" style="display:none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>提交需求 / 反馈</h2>
+          <button class="modal-close" id="modalClose">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <label>机构名称 <span class="req">*</span></label>
+            <input type="text" id="fOrg" placeholder="请输入您所在的机构名称">
+          </div>
+          <div class="form-row">
+            <label>联系人 <span class="req">*</span></label>
+            <input type="text" id="fContact" placeholder="姓名，方便我们对接">
+          </div>
+          <div class="form-row">
+            <label>类型 <span class="req">*</span></label>
+            <select id="fType">
+              <option value="咨询">咨询</option>
+              <option value="需求">需求（希望新增的能力）</option>
+              <option value="bug">问题/异常（使用中遇到的bug）</option>
+              <option value="建议">建议</option>
+              <option value="开通试用">开通试用</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>详细描述 <span class="req">*</span></label>
+            <textarea id="fDesc" rows="4" placeholder="请详细描述您的问题或需求，越具体越好"></textarea>
+          </div>
+          <div class="form-row">
+            <label>补充说明（选填）</label>
+            <input type="text" id="fExtra" placeholder="如涉及的场景、期望的时间等">
+          </div>
+          <div class="form-tip" id="formTip"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" id="btnCancel">取消</button>
+          <button class="btn-submit" id="btnSubmit">提交</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="/static/chat.js"></script>
+</body>
+</html>
