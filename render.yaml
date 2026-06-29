@@ -4,9 +4,13 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
     envVars:
       - key: DATA_DIR
         value: /tmp
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: DEEPSEEK_API_KEY
+        sync: false  # 在Render后台手动填写，不写入代码
+      - key: DEEPSEEK_MODEL
+        value: deepseek-chat
