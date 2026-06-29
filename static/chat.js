@@ -5,6 +5,9 @@ const sendBtn = document.getElementById("sendBtn");
 const quickBar = document.getElementById("quickBar");
 const feedbackModal = document.getElementById("feedbackModal");
 
+// 对话历史（发给DeepSeek实现多轮对话）
+let chatHistory = [];
+
 // 追加消息
 function addMessage(text, sender) {
   const msg = document.createElement("div");
@@ -48,19 +51,24 @@ async function send(text) {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ message: text, history: chatHistory })
     });
     const data = await res.json();
     hideTyping();
 
     if (data.ok) {
-      addMessage(escapeHtml(data.answer).replace(/\n/g, "<br>"), "bot");
+      // 简单的markdown渲染：加粗、换行、列表
+      const html = formatAnswer(data.answer);
+      addMessage(html, "bot");
+
+      // 记录历史
+      chatHistory.push({ role: "user", content: text });
+      chatHistory.push({ role: "assistant", content: data.answer });
+      // 保留最近10条
+      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
       if (data.suggest_feedback) {
-        // 附加一个快捷提需求提示
-        const bubble = addMessage(
-          '点击下方「📝 我要提需求」按钮，把您的需求留给我们，项目经理赖雨晴会尽快跟进 👇',
-          "bot"
-        );
+        addMessage('点击下方「📝 我要提需求」按钮，把您的需求留给我们，项目经理赖雨晴会尽快跟进 👇', "bot");
       }
     } else {
       addMessage("出了点小问题，请稍后重试。", "bot");
@@ -71,6 +79,18 @@ async function send(text) {
   }
   sendBtn.disabled = false;
   inputEl.focus();
+}
+
+// 简单markdown格式化
+function formatAnswer(text) {
+  let s = escapeHtml(text);
+  // 加粗 **text**
+  s = s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  // 换行
+  s = s.replace(/\n/g, "<br>");
+  // 列表项 • 或 - 开头
+  s = s.replace(/^<br>[•\-]\s*/gm, "<br>• ");
+  return s;
 }
 
 // HTML转义
@@ -155,12 +175,10 @@ btnSubmit.addEventListener("click", async () => {
     if (data.ok) {
       tip.className = "form-tip success";
       tip.textContent = "✅ " + data.message;
-      // 清空表单
       document.getElementById("fOrg").value = "";
       document.getElementById("fContact").value = "";
       document.getElementById("fDesc").value = "";
       document.getElementById("fExtra").value = "";
-      // 在聊天区也提示
       setTimeout(() => {
         closeModal();
         addMessage("✅ 您的需求已提交成功！项目经理赖雨晴会尽快跟进，感谢您的反馈。", "bot");

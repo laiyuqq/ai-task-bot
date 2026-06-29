@@ -6,30 +6,24 @@
 <title>管理后台 · AI任务中台</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --primary: #4f6df5; --primary-dark: #3b56d4;
-  --bg: #f0f2f5; --border: #e5e7eb; --text: #1a1a2e; --text-light: #6b7280;
-}
+:root { --primary: #4f6df5; --primary-dark: #3b56d4; --bg: #f0f2f5; --border: #e5e7eb; --text: #1a1a2e; --text-light: #6b7280; }
 body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 .topbar { background: linear-gradient(135deg, #4f6df5, #6d5df5); color: #fff; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .topbar h1 { font-size: 18px; }
 .topbar a { color: #fff; text-decoration: none; font-size: 13px; opacity: 0.9; }
 .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
-/* Tab */
-.tabs { display: flex; gap: 4px; margin-bottom: 20px; }
-.tab { padding: 10px 24px; background: #fff; border: 1px solid var(--border); border-radius: 10px 10px 0 0; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-light); border-bottom: none; transition: all 0.2s; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 10px 20px; background: #fff; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-light); transition: all 0.2s; }
 .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* 统计卡片 */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
 .stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .stat-card .num { font-size: 32px; font-weight: 800; color: var(--primary); }
 .stat-card .label { font-size: 13px; color: var(--text-light); margin-top: 4px; }
 
-/* 工具栏 */
 .toolbar { background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .toolbar select, .toolbar input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; }
 .toolbar input { width: 180px; }
@@ -37,37 +31,43 @@ body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
 .btn-export { background: #22c55e; color: #fff; }
 .btn-export:hover { background: #16a34a; }
 .btn-refresh { background: #f3f4f6; color: var(--text); }
-.btn-refresh:hover { background: #e5e7eb; }
 .btn-add { background: var(--primary); color: #fff; }
 .btn-add:hover { background: var(--primary-dark); }
+.btn-danger { background: #fee2e2; color: #ef4444; }
 
-/* 表格 */
-.table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.table-wrap { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th { background: #f9fafb; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 700; color: var(--text-light); border-bottom: 1px solid var(--border); white-space: nowrap; }
 td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
 tr:hover td { background: #f9fafb; }
 td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
 
-/* 状态/类型标签 */
 .tag { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-.tag-待处理 { background: #fef3c7; color: #92400e; }
-.tag-处理中 { background: #dbeafe; color: #1e40af; }
-.tag-已完成 { background: #d1fae5; color: #065f46; }
-.tag-已关闭 { background: #f3f4f6; color: #6b7280; }
+.tag-待处理 { background: #fef3c7; color: #92400e; } .tag-处理中 { background: #dbeafe; color: #1e40af; }
+.tag-已完成 { background: #d1fae5; color: #065f46; } .tag-已关闭 { background: #f3f4f6; color: #6b7280; }
 .type-tag { padding: 2px 8px; border-radius: 8px; font-size: 12px; }
-.type-咨询 { background: #e0e7ff; color: #4338ca; }
-.type-需求 { background: #fce7f3; color: #9d174d; }
-.type-bug { background: #fee2e2; color: #991b1b; }
-.type-建议 { background: #ccfbf1; color: #115e59; }
+.type-咨询 { background: #e0e7ff; color: #4338ca; } .type-需求 { background: #fce7f3; color: #9d174d; }
+.type-bug { background: #fee2e2; color: #991b1b; } .type-建议 { background: #ccfbf1; color: #115e59; }
 .type-开通试用 { background: #f3e8ff; color: #6b21a8; }
 .cat-tag { padding: 2px 8px; border-radius: 8px; font-size: 12px; background: #f0f9ff; color: #0369a1; }
+.src-tag { padding: 2px 8px; border-radius: 8px; font-size: 11px; }
+.src-deepseek { background: #ddd6fe; color: #5b21b6; } .src-keyword { background: #fed7aa; color: #9a3412; }
+.src-keyword_fallback { background: #fef3c7; color: #92400e; } .src-fallback { background: #fee2e2; color: #991b1b; }
 
-/* 操作按钮 */
 .op-btn { background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-right: 4px; }
 .op-btn:hover { border-color: var(--primary); color: var(--primary); }
 .op-btn.del:hover { border-color: #ef4444; color: #ef4444; }
 .empty { text-align: center; padding: 60px 20px; color: var(--text-light); }
+
+/* 图表 */
+.chart-card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.chart-card h3 { font-size: 15px; margin-bottom: 14px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding-top: 10px; }
+.bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar { width: 100%; max-width: 40px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.3s; position: relative; }
+.bar.chats { background: #818cf8; }
+.bar-label { font-size: 11px; color: var(--text-light); }
+.bar-val { font-size: 11px; font-weight: 600; }
 
 /* 弹窗 */
 .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
@@ -80,7 +80,7 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
 .form-row label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
 .form-row label .hint { font-weight: 400; color: var(--text-light); font-size: 12px; }
 .req { color: #ef4444; }
-.form-row input, .form-row select, .form-row textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s; }
+.form-row input, .form-row select, .form-row textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
 .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--primary); }
 .form-row textarea { resize: vertical; }
 .form-tip { font-size: 13px; color: #ef4444; min-height: 18px; }
@@ -91,11 +91,15 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
 .btn-submit:hover { background: var(--primary-dark); }
 .btn-submit:disabled { background: #a5b4fc; }
 
-@media (max-width: 768px) {
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .container { padding: 16px; }
-  td.desc { max-width: 200px; }
-}
+/* 上传区 */
+.upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.upload-zone:hover { border-color: var(--primary); background: #f5f7ff; }
+.upload-zone.dragover { border-color: var(--primary); background: #eef1ff; }
+.upload-zone p { color: var(--text-light); font-size: 14px; margin-top: 8px; }
+.upload-zone .icon { font-size: 36px; }
+.upload-formats { font-size: 12px; color: var(--text-light); margin-top: 6px; }
+
+@media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } .container { padding: 16px; } td.desc { max-width: 200px; } }
 </style>
 </head>
 <body>
@@ -105,39 +109,50 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
 </div>
 
 <div class="container">
-  <!-- Tab 切换 -->
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('req')">📝 需求管理</div>
-    <div class="tab" onclick="switchTab('kb')">📚 知识库管理</div>
+    <div class="tab active" onclick="switchTab('dashboard',event)">📊 数据看板</div>
+    <div class="tab" onclick="switchTab('req',event)">📝 需求管理</div>
+    <div class="tab" onclick="switchTab('kb',event)">📚 知识库</div>
+    <div class="tab" onclick="switchTab('docs',event)">📎 文档资料</div>
+    <div class="tab" onclick="switchTab('logs',event)">💬 问答记录</div>
+  </div>
+
+  <!-- ===== 数据看板 ===== -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats" id="dashStats"></div>
+    <div class="chart-card">
+      <h3>📈 近7天访问量</h3>
+      <div class="bar-chart" id="visitsChart"></div>
+    </div>
+    <div class="chart-card">
+      <h3>💬 近7天问答数</h3>
+      <div class="bar-chart" id="chatsChart"></div>
+    </div>
   </div>
 
   <!-- ===== 需求管理 ===== -->
-  <div class="tab-content active" id="tab-req">
-    <div class="stats" id="stats"></div>
+  <div class="tab-content" id="tab-req">
+    <div class="stats" id="reqStats"></div>
     <div class="toolbar">
-      <input type="text" id="filterOrg" placeholder="筛选机构名称…" oninput="loadData()">
+      <input type="text" id="filterOrg" placeholder="筛选机构…" oninput="loadData()">
       <select id="filterType" onchange="loadData()">
-        <option value="">全部类型</option>
-        <option value="咨询">咨询</option><option value="需求">需求</option>
+        <option value="">全部类型</option><option value="咨询">咨询</option><option value="需求">需求</option>
         <option value="bug">问题/异常</option><option value="建议">建议</option><option value="开通试用">开通试用</option>
       </select>
       <select id="filterStatus" onchange="loadData()">
-        <option value="">全部状态</option>
-        <option value="待处理">待处理</option><option value="处理中">处理中</option>
+        <option value="">全部状态</option><option value="待处理">待处理</option><option value="处理中">处理中</option>
         <option value="已完成">已完成</option><option value="已关闭">已关闭</option>
       </select>
       <button class="btn btn-export" onclick="exportExcel()">⬇ 导出Excel</button>
       <button class="btn btn-refresh" onclick="loadData()">🔄 刷新</button>
     </div>
     <div class="table-wrap">
-      <table><thead><tr>
-        <th>序号</th><th>时间</th><th>机构</th><th>联系人</th>
-        <th>类型</th><th>描述</th><th>补充</th><th>状态</th><th>操作</th>
-      </tr></thead><tbody id="tbody"></tbody></table>
+      <table><thead><tr><th>序号</th><th>时间</th><th>机构</th><th>联系人</th><th>类型</th><th>描述</th><th>补充</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody id="tbody"></tbody></table>
     </div>
   </div>
 
-  <!-- ===== 知识库管理 ===== -->
+  <!-- ===== 知识库 ===== -->
   <div class="tab-content" id="tab-kb">
     <div class="toolbar">
       <input type="text" id="kbSearch" placeholder="搜索问题或关键词…" oninput="loadKB()">
@@ -146,202 +161,139 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
       <span style="margin-left:auto;color:var(--text-light);font-size:13px" id="kbCount"></span>
     </div>
     <div class="table-wrap">
-      <table><thead><tr>
-        <th>序号</th><th>分类</th><th>问题</th><th>关键词</th><th>答案预览</th><th>操作</th>
-      </tr></thead><tbody id="kbTbody"></tbody></table>
+      <table><thead><tr><th>序号</th><th>分类</th><th>问题</th><th>关键词</th><th>答案预览</th><th>操作</th></tr></thead>
+      <tbody id="kbTbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ===== 文档资料 ===== -->
+  <div class="tab-content" id="tab-docs">
+    <div class="toolbar">
+      <button class="btn btn-add" onclick="document.getElementById('docFile').click()">📎 上传文档</button>
+      <button class="btn btn-refresh" onclick="loadDocs()">🔄 刷新</button>
+      <input type="file" id="docFile" style="display:none" accept=".txt,.md,.pdf,.docx" onchange="uploadDoc(event)">
+      <span style="margin-left:auto;color:var(--text-light);font-size:13px" id="docsCount"></span>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.06);font-size:13px;color:var(--text-light);line-height:1.8">
+      💡 上传的文档会自动作为Bot的知识来源——使用者提问时，Bot会结合FAQ和文档内容一起回答。支持格式：txt、md、pdf、docx
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>序号</th><th>文档名称</th><th>大小</th><th>上传时间</th><th>内容预览</th><th>操作</th></tr></thead>
+      <tbody id="docsTbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ===== 问答记录 ===== -->
+  <div class="tab-content" id="tab-logs">
+    <div class="toolbar">
+      <span style="color:var(--text-light);font-size:13px" id="logsCount"></span>
+      <button class="btn btn-refresh" onclick="loadLogs()">🔄 刷新</button>
+      <button class="btn btn-danger" onclick="clearLogs()">🗑 清空记录</button>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>时间</th><th>IP</th><th>用户提问</th><th>Bot回答</th><th>来源</th><th>耗时</th></tr></thead>
+      <tbody id="logsTbody"></tbody></table>
+    </div>
+    <div style="text-align:center;padding:16px">
+      <button class="btn btn-refresh" onclick="loadLogsNext()">加载更多</button>
     </div>
   </div>
 </div>
 
-<!-- ===== 知识库编辑弹窗 ===== -->
+<!-- 知识库编辑弹窗 -->
 <div class="modal-mask" id="kbModal" style="display:none;">
   <div class="modal">
-    <div class="modal-header">
-      <h2 id="kbModalTitle">新增问答</h2>
-      <button class="modal-close" onclick="closeKbModal()">✕</button>
-    </div>
+    <div class="modal-header"><h2 id="kbModalTitle">新增问答</h2><button class="modal-close" onclick="closeKbModal()">✕</button></div>
     <div class="modal-body">
-      <div class="form-row">
-        <label>问题 <span class="req">*</span></label>
-        <input type="text" id="kbQuestion" placeholder="例如：话术生成准确吗？">
-      </div>
-      <div class="form-row">
-        <label>分类</label>
-        <input type="text" id="kbCategory" placeholder="如：核心能力、使用指南、开通与反馈…" value="其他">
-      </div>
-      <div class="form-row">
-        <label>关键词 <span class="hint">（逗号分隔，Bot 靠这些词匹配用户提问）</span></label>
-        <input type="text" id="kbKeywords" placeholder="话术,准确,准确率,生成质量">
-      </div>
-      <div class="form-row">
-        <label>答案 <span class="req">*</span></label>
-        <textarea id="kbAnswer" rows="5" placeholder="输入这条问答的回复内容，支持换行"></textarea>
-      </div>
+      <div class="form-row"><label>问题 <span class="req">*</span></label><input type="text" id="kbQuestion" placeholder="例如：话术生成准确吗？"></div>
+      <div class="form-row"><label>分类</label><input type="text" id="kbCategory" value="其他"></div>
+      <div class="form-row"><label>关键词 <span class="hint">（逗号分隔）</span></label><input type="text" id="kbKeywords" placeholder="话术,准确,准确率"></div>
+      <div class="form-row"><label>答案 <span class="req">*</span></label><textarea id="kbAnswer" rows="5" placeholder="输入回复内容"></textarea></div>
       <div class="form-tip" id="kbFormTip"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeKbModal()">取消</button>
-      <button class="btn-submit" id="kbSubmitBtn" onclick="saveKb()">保存</button>
-    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeKbModal()">取消</button><button class="btn-submit" id="kbSubmitBtn" onclick="saveKb()">保存</button></div>
   </div>
 </div>
 
 <script>
-/* ===== Tab 切换 ===== */
-function switchTab(name) {
+function switchTab(name, e) {
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-  event.target.classList.add("active");
+  e.target.classList.add("active");
   document.getElementById("tab-" + name).classList.add("active");
+  if (name === "dashboard") loadDashboard();
+  if (name === "req") loadData();
   if (name === "kb") loadKB();
+  if (name === "docs") loadDocs();
+  if (name === "logs") loadLogs();
+}
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmtSize(b){if(!b)return"0B";if(b<1024)return b+"B";if(b<1048576)return(b/1024).toFixed(1)+"KB";return(b/1048576).toFixed(1)+"MB";}
+
+/* ===== 数据看板 ===== */
+async function loadDashboard() {
+  const res = await fetch("/api/analytics/overview?days=7");
+  const d = await res.json();
+  if (!d.ok) return;
+  document.getElementById("dashStats").innerHTML = `
+    <div class="stat-card"><div class="num">${d.today_visits}</div><div class="label">今日访问</div></div>
+    <div class="stat-card"><div class="num">${d.today_chats}</div><div class="label">今日问答</div></div>
+    <div class="stat-card"><div class="num">${d.total_visits}</div><div class="label">总访问量</div></div>
+    <div class="stat-card"><div class="num">${d.total_chats}</div><div class="label">总问答数</div></div>`;
+  // 访问量柱状图
+  const maxV = Math.max(...d.daily_visits.map(x=>x.count), 1);
+  document.getElementById("visitsChart").innerHTML = d.daily_visits.map(x => `
+    <div class="bar-item"><div class="bar-val">${x.count}</div><div class="bar" style="height:${x.count/maxV*140}px"></div><div class="bar-label">${x.date.slice(5)}</div></div>`).join("");
+  // 问答数柱状图
+  const maxC = Math.max(...d.daily_chats.map(x=>x.count), 1);
+  document.getElementById("chatsChart").innerHTML = d.daily_chats.map(x => `
+    <div class="bar-item"><div class="bar-val">${x.count}</div><div class="bar chats" style="height:${x.count/maxC*140}px"></div><div class="bar-label">${x.date.slice(5)}</div></div>`).join("");
 }
 
 /* ===== 需求管理 ===== */
 async function loadData() {
-  const org = document.getElementById("filterOrg").value;
-  const type = document.getElementById("filterType").value;
-  const status = document.getElementById("filterStatus").value;
-  let url = "/api/requests?";
-  if (org) url += "org=" + encodeURIComponent(org) + "&";
-  if (type) url += "type=" + encodeURIComponent(type) + "&";
-  if (status) url += "status=" + encodeURIComponent(status);
-  const res = await fetch(url);
-  const data = await res.json();
-  const tbody = document.getElementById("tbody");
-  if (!data.ok || data.data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">暂无需求记录</td></tr>';
-  } else {
-    tbody.innerHTML = data.data.map((r, i) => `
-      <tr>
-        <td>${i+1}</td><td>${r.time}</td><td>${esc(r.org)}</td><td>${esc(r.contact)}</td>
-        <td><span class="type-tag type-${esc(r.type)}">${esc(r.type)}</span></td>
-        <td class="desc">${esc(r.description)}</td><td class="desc">${esc(r.extra||"-")}</td>
-        <td><span class="tag tag-${esc(r.status)}">${esc(r.status)}</span></td>
-        <td><button class="op-btn" onclick="cycleStatus('${r.id}','${r.status}')">改状态</button><button class="op-btn del" onclick="del('${r.id}')">删除</button></td>
-      </tr>`).join("");
-  }
-  loadStats();
+  const org=document.getElementById("filterOrg").value, type=document.getElementById("filterType").value, status=document.getElementById("filterStatus").value;
+  let url="/api/requests?"; if(org)url+="org="+encodeURIComponent(org)+"&"; if(type)url+="type="+encodeURIComponent(type)+"&"; if(status)url+="status="+encodeURIComponent(status);
+  const res=await fetch(url); const data=await res.json(); const tbody=document.getElementById("tbody");
+  if(!data.ok||data.data.length===0){tbody.innerHTML='<tr><td colspan="9" class="empty">暂无需求记录</td></tr>';}
+  else{tbody.innerHTML=data.data.map((r,i)=>`<tr><td>${i+1}</td><td>${r.time}</td><td>${esc(r.org)}</td><td>${esc(r.contact)}</td><td><span class="type-tag type-${esc(r.type)}">${esc(r.type)}</span></td><td class="desc">${esc(r.description)}</td><td class="desc">${esc(r.extra||"-")}</td><td><span class="tag tag-${esc(r.status)}">${esc(r.status)}</span></td><td><button class="op-btn" onclick="cycleStatus('${r.id}','${r.status}')">改状态</button><button class="op-btn del" onclick="del('${r.id}')">删除</button></td></tr>`).join("");}
+  loadReqStats();
 }
-async function loadStats() {
-  const res = await fetch("/api/stats");
-  const data = await res.json();
-  if (!data.ok) return;
-  const pending = data.by_status["待处理"]||0;
-  const done = (data.by_status["已完成"]||0)+(data.by_status["已关闭"]||0);
-  const orgCount = Object.keys(data.by_org).length;
-  document.getElementById("stats").innerHTML = `
-    <div class="stat-card"><div class="num">${data.total}</div><div class="label">需求总数</div></div>
-    <div class="stat-card"><div class="num">${pending}</div><div class="label">待处理</div></div>
-    <div class="stat-card"><div class="num">${orgCount}</div><div class="label">涉及机构数</div></div>
-    <div class="stat-card"><div class="num">${done}</div><div class="label">已处理完成</div></div>`;
+async function loadReqStats() {
+  const res=await fetch("/api/stats"); const d=await res.json(); if(!d.ok)return;
+  const pending=d.by_status["待处理"]||0, done=(d.by_status["已完成"]||0)+(d.by_status["已关闭"]||0), orgCount=Object.keys(d.by_org).length;
+  document.getElementById("reqStats").innerHTML=`<div class="stat-card"><div class="num">${d.total}</div><div class="label">需求总数</div></div><div class="stat-card"><div class="num">${pending}</div><div class="label">待处理</div></div><div class="stat-card"><div class="num">${orgCount}</div><div class="label">涉及机构</div></div><div class="stat-card"><div class="num">${done}</div><div class="label">已完成</div></div>`;
 }
-async function cycleStatus(id,current){const flow=["待处理","处理中","已完成","已关闭"];const next=flow[(flow.indexOf(current)+1)%flow.length];await fetch(`/api/requests/${id}/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:next})});loadData();}
+async function cycleStatus(id,current){const f=["待处理","处理中","已完成","已关闭"];const n=f[(f.indexOf(current)+1)%f.length];await fetch(`/api/requests/${id}/status`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:n})});loadData();}
 async function del(id){if(!confirm("确认删除？"))return;await fetch(`/api/requests/${id}`,{method:"DELETE"});loadData();}
 function exportExcel(){window.location.href="/api/export_excel";}
 
-/* ===== 知识库管理 ===== */
-let kbData = [];
-let editingKbId = null;
+/* ===== 知识库 ===== */
+let kbData=[];
+async function loadKB(){const res=await fetch("/api/kb");const d=await res.json();if(!d.ok)return;kbData=d.faq;renderKB();}
+function renderKB(){const s=document.getElementById("kbSearch").value.toLowerCase();const tbody=document.getElementById("kbTbody");let f=kbData;if(s){f=kbData.filter(x=>x.question.toLowerCase().includes(s)||(x.keywords||[]).join(",").toLowerCase().includes(s)||x.answer.toLowerCase().includes(s));}
+document.getElementById("kbCount").textContent=`共 ${f.length} 条`;
+if(!f.length){tbody.innerHTML='<tr><td colspan="6" class="empty">暂无条目</td></tr>';return;}
+tbody.innerHTML=f.map((x,i)=>`<tr><td>${i+1}</td><td><span class="cat-tag">${esc(x.category||"-")}</span></td><td>${esc(x.question)}</td><td class="desc">${esc((x.keywords||[]).join("、"))}</td><td class="desc">${esc(x.answer).substring(0,80)}${x.answer.length>80?"…":""}</td><td><button class="op-btn" onclick="openKbModal('${x.id}')">编辑</button><button class="op-btn del" onclick="delKb('${x.id}')">删除</button></td></tr>`).join("");}
+function openKbModal(id){editingKbId=id||null;document.getElementById("kbModalTitle").textContent=id?"编辑问答":"新增问答";document.getElementById("kbFormTip").textContent="";document.getElementById("kbFormTip").className="form-tip";if(id){const x=kbData.find(f=>f.id===id);if(x){document.getElementById("kbQuestion").value=x.question;document.getElementById("kbCategory").value=x.category||"其他";document.getElementById("kbKeywords").value=(x.keywords||[]).join("，");document.getElementById("kbAnswer").value=x.answer;}}else{document.getElementById("kbQuestion").value="";document.getElementById("kbCategory").value="其他";document.getElementById("kbKeywords").value="";document.getElementById("kbAnswer").value="";}document.getElementById("kbModal").style.display="flex";}
+function closeKbModal(){document.getElementById("kbModal").style.display="none";}
+let editingKbId=null;
+async function saveKb(){const q=document.getElementById("kbQuestion").value.trim(),c=document.getElementById("kbCategory").value.trim(),k=document.getElementById("kbKeywords").value.trim(),a=document.getElementById("kbAnswer").value.trim(),tip=document.getElementById("kbFormTip");if(!q){tip.textContent="请填写问题";return;}if(!a){tip.textContent="请填写答案";return;}const btn=document.getElementById("kbSubmitBtn");btn.disabled=true;btn.textContent="保存中…";try{const url=editingKbId?`/api/kb/${editingKbId}`:"/api/kb";const m=editingKbId?"PUT":"POST";const res=await fetch(url,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q,category:c,keywords:k,answer:a})});const d=await res.json();if(d.ok){closeKbModal();await loadKB();}else{tip.textContent="失败："+(d.error||"");}}catch(e){tip.textContent="网络异常";}btn.disabled=false;btn.textContent="保存";}
+async function delKb(id){if(!confirm("确认删除？"))return;await fetch(`/api/kb/${id}`,{method:"DELETE"});loadKB();}
 
-async function loadKB() {
-  const res = await fetch("/api/kb");
-  const data = await res.json();
-  if (!data.ok) return;
-  kbData = data.faq;
-  renderKB();
-}
-function renderKB() {
-  const search = document.getElementById("kbSearch").value.toLowerCase();
-  const tbody = document.getElementById("kbTbody");
-  let filtered = kbData;
-  if (search) {
-    filtered = kbData.filter(f =>
-      f.question.toLowerCase().includes(search) ||
-      (f.keywords||[]).join(",").toLowerCase().includes(search) ||
-      f.answer.toLowerCase().includes(search)
-    );
-  }
-  document.getElementById("kbCount").textContent = `共 ${filtered.length} 条`;
-  if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无知识库条目</td></tr>';
-    return;
-  }
-  tbody.innerHTML = filtered.map((f, i) => `
-    <tr>
-      <td>${i+1}</td>
-      <td><span class="cat-tag">${esc(f.category||"-")}</span></td>
-      <td>${esc(f.question)}</td>
-      <td class="desc">${esc((f.keywords||[]).join("、"))}</td>
-      <td class="desc">${esc(f.answer).substring(0,80)}${f.answer.length>80?"…":""}</td>
-      <td>
-        <button class="op-btn" onclick="openKbModal('${f.id}')">编辑</button>
-        <button class="op-btn del" onclick="delKb('${f.id}')">删除</button>
-      </td>
-    </tr>`).join("");
-}
+/* ===== 文档管理 ===== */
+async function loadDocs(){const res=await fetch("/api/docs");const d=await res.json();if(!d.ok)return;const tbody=document.getElementById("docsTbody");document.getElementById("docsCount").textContent=`共 ${d.total} 个文档`;if(!d.data.length){tbody.innerHTML='<tr><td colspan="6" class="empty">暂无文档，点击上方「上传文档」添加</td></tr>';return;}tbody.innerHTML=d.data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${fmtSize(x.size)}</td><td>${x.upload_time}</td><td class="desc">${esc(x.preview||"")}</td><td><button class="op-btn del" onclick="delDoc('${x.id}')">删除</button></td></tr>`).join("");}
+async function uploadDoc(e){const file=e.target.files[0];if(!file)return;const fd=new FormData();fd.append("file",file);const tbody=document.getElementById("docsTbody");tbody.innerHTML='<tr><td colspan="6" class="empty">上传中…</td></tr>';try{const res=await fetch("/api/docs/upload",{method:"POST",body:fd});const d=await res.json();if(d.ok){alert(d.message);}else{alert("上传失败："+d.error);}}catch(err){alert("网络异常");}e.target.value="";loadDocs();}
+async function delDoc(id){if(!confirm("确认删除此文档？"))return;await fetch(`/api/docs/${id}`,{method:"DELETE"});loadDocs();}
 
-function openKbModal(id) {
-  editingKbId = id || null;
-  document.getElementById("kbModalTitle").textContent = id ? "编辑问答" : "新增问答";
-  document.getElementById("kbFormTip").textContent = "";
-  document.getElementById("kbFormTip").className = "form-tip";
-  if (id) {
-    const item = kbData.find(f => f.id === id);
-    if (item) {
-      document.getElementById("kbQuestion").value = item.question;
-      document.getElementById("kbCategory").value = item.category || "其他";
-      document.getElementById("kbKeywords").value = (item.keywords||[]).join("，");
-      document.getElementById("kbAnswer").value = item.answer;
-    }
-  } else {
-    document.getElementById("kbQuestion").value = "";
-    document.getElementById("kbCategory").value = "其他";
-    document.getElementById("kbKeywords").value = "";
-    document.getElementById("kbAnswer").value = "";
-  }
-  document.getElementById("kbModal").style.display = "flex";
-}
-function closeKbModal() { document.getElementById("kbModal").style.display = "none"; }
+/* ===== 问答记录 ===== */
+let logsPage=1;
+async function loadLogs(){logsPage=1;await loadLogsPage();}
+async function loadLogsNext(){logsPage++;await loadLogsPage(true);}
+async function loadLogsPage(append){const res=await fetch(`/api/analytics/chat_logs?page=${logsPage}`);const d=await res.json();if(!d.ok)return;const tbody=document.getElementById("logsTbody");document.getElementById("logsCount").textContent=`共 ${d.total} 条记录`;let html=d.data.map(l=>`<tr><td>${l.time}</td><td>${esc(l.ip)}</td><td class="desc">${esc(l.user)}</td><td class="desc">${esc(l.bot).substring(0,150)}${l.bot.length>150?"…":""}</td><td><span class="src-tag src-${esc(l.source)}">${esc(l.source)}</span></td><td>${l.duration_ms}ms</td></tr>`).join("");if(append){tbody.innerHTML+=html;}else{tbody.innerHTML=html||'<tr><td colspan="6" class="empty">暂无问答记录</td></tr>';}}
+async function clearLogs(){if(!confirm("确认清空所有问答记录？此操作不可撤销"))return;await fetch("/api/analytics/chat_logs",{method:"DELETE"});loadLogs();}
 
-async function saveKb() {
-  const question = document.getElementById("kbQuestion").value.trim();
-  const category = document.getElementById("kbCategory").value.trim();
-  const keywords = document.getElementById("kbKeywords").value.trim();
-  const answer = document.getElementById("kbAnswer").value.trim();
-  const tip = document.getElementById("kbFormTip");
-  if (!question) { tip.textContent = "请填写问题"; return; }
-  if (!answer) { tip.textContent = "请填写答案"; return; }
-
-  const btn = document.getElementById("kbSubmitBtn");
-  btn.disabled = true; btn.textContent = "保存中…";
-
-  try {
-    const url = editingKbId ? `/api/kb/${editingKbId}` : "/api/kb";
-    const method = editingKbId ? "PUT" : "POST";
-    const res = await fetch(url, {
-      method, headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, category, keywords, answer })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      closeKbModal();
-      await loadKB();
-    } else {
-      tip.textContent = "保存失败：" + (data.error || "未知错误");
-    }
-  } catch(e) { tip.textContent = "网络异常"; }
-  btn.disabled = false; btn.textContent = "保存";
-}
-
-async function delKb(id) {
-  if (!confirm("确认删除这条问答？删除后Bot将不再回答此问题。")) return;
-  await fetch(`/api/kb/${id}`, { method: "DELETE" });
-  loadKB();
-}
-
-function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-
-loadData();
+loadDashboard();
 </script>
 </body>
 </html>
