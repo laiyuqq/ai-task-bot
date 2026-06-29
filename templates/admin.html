@@ -99,6 +99,21 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
 .upload-zone .icon { font-size: 36px; }
 .upload-formats { font-size: 12px; color: var(--text-light); margin-top: 6px; }
 
+/* 数据分析 */
+.rank-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.rank-num { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.rank-bar-wrap { flex: 1; height: 26px; background: #f3f4f6; border-radius: 6px; overflow: hidden; position: relative; }
+.rank-bar { height: 100%; border-radius: 6px; transition: width 0.5s; display: flex; align-items: center; padding-left: 8px; }
+.rank-label { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.rank-count { font-size: 12px; font-weight: 700; margin-left: 6px; white-space: nowrap; }
+.dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dist-label { width: 90px; font-size: 13px; text-align: right; }
+.dist-bar-wrap { flex: 1; height: 22px; background: #f3f4f6; border-radius: 6px; overflow: hidden; }
+.dist-bar { height: 100%; border-radius: 6px; transition: width 0.5s; }
+.dist-val { font-size: 12px; font-weight: 600; width: 36px; }
+.rt-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.rt-item .rt-val { font-weight: 700; color: var(--primary); }
+
 @media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } .container { padding: 16px; } td.desc { max-width: 200px; } }
 </style>
 </head>
@@ -115,6 +130,7 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
     <div class="tab" onclick="switchTab('kb',event)">📚 知识库</div>
     <div class="tab" onclick="switchTab('docs',event)">📎 文档资料</div>
     <div class="tab" onclick="switchTab('logs',event)">💬 问答记录</div>
+    <div class="tab" onclick="switchTab('insights',event)">🔍 数据分析</div>
   </div>
 
   <!-- ===== 数据看板 ===== -->
@@ -198,6 +214,58 @@ td.desc { max-width: 320px; white-space: pre-wrap; word-break: break-all; }
       <button class="btn btn-refresh" onclick="loadLogsNext()">加载更多</button>
     </div>
   </div>
+
+  <!-- ===== 数据分析 ===== -->
+  <div class="tab-content" id="tab-insights">
+    <!-- 概览数字 -->
+    <div class="stats" id="insightsStats"></div>
+
+    <!-- 机构需求排行 + 需求类型分布 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" id="insightsRow1">
+      <div class="chart-card">
+        <h3>🏢 机构需求排行 TOP10</h3>
+        <div id="orgRanking"></div>
+      </div>
+      <div class="chart-card">
+        <h3>📋 需求类型分布</h3>
+        <div id="typeDist"></div>
+      </div>
+    </div>
+
+    <!-- 热门问题 + 问答来源 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px" id="insightsRow2">
+      <div class="chart-card">
+        <h3>🔥 热门问题 TOP15</h3>
+        <div id="hotQuestions"></div>
+      </div>
+      <div class="chart-card">
+        <h3>🤖 问答来源分布</h3>
+        <div id="sourceDist"></div>
+      </div>
+    </div>
+
+    <!-- 活跃时段 + 响应时间 -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px" id="insightsRow3">
+      <div class="chart-card">
+        <h3>⏰ 活跃时段分布</h3>
+        <div class="bar-chart" id="hourlyChart" style="height:120px"></div>
+      </div>
+      <div class="chart-card">
+        <h3>⚡ 响应时间</h3>
+        <div id="responseTime"></div>
+      </div>
+    </div>
+
+    <!-- 知识盲区 -->
+    <div class="chart-card">
+      <h3>⚠️ 知识盲区 — Bot未能解答的问题（共 <span id="gapsCount">0</span> 条）</h3>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:10px">这些问题是知识库的薄弱点，建议针对性补充FAQ或上传相关文档</div>
+      <div class="table-wrap" style="box-shadow:none">
+        <table><thead><tr><th>时间</th><th>用户问题</th><th>来源</th></tr></thead>
+        <tbody id="gapsTbody"></tbody></table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- 知识库编辑弹窗 -->
@@ -226,6 +294,7 @@ function switchTab(name, e) {
   if (name === "kb") loadKB();
   if (name === "docs") loadDocs();
   if (name === "logs") loadLogs();
+  if (name === "insights") loadInsights();
 }
 function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function fmtSize(b){if(!b)return"0B";if(b<1024)return b+"B";if(b<1048576)return(b/1024).toFixed(1)+"KB";return(b/1048576).toFixed(1)+"MB";}
@@ -292,6 +361,84 @@ async function loadLogs(){logsPage=1;await loadLogsPage();}
 async function loadLogsNext(){logsPage++;await loadLogsPage(true);}
 async function loadLogsPage(append){const res=await fetch(`/api/analytics/chat_logs?page=${logsPage}`);const d=await res.json();if(!d.ok)return;const tbody=document.getElementById("logsTbody");document.getElementById("logsCount").textContent=`共 ${d.total} 条记录`;let html=d.data.map(l=>`<tr><td>${l.time}</td><td>${esc(l.ip)}</td><td class="desc">${esc(l.user)}</td><td class="desc">${esc(l.bot).substring(0,150)}${l.bot.length>150?"…":""}</td><td><span class="src-tag src-${esc(l.source)}">${esc(l.source)}</span></td><td>${l.duration_ms}ms</td></tr>`).join("");if(append){tbody.innerHTML+=html;}else{tbody.innerHTML=html||'<tr><td colspan="6" class="empty">暂无问答记录</td></tr>';}}
 async function clearLogs(){if(!confirm("确认清空所有问答记录？此操作不可撤销"))return;await fetch("/api/analytics/chat_logs",{method:"DELETE"});loadLogs();}
+
+/* ===== 数据分析 ===== */
+const rankColors = ["#ef4444","#f97316","#f59e0b","#22c55e","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#6366f1","#94a3b8"];
+const distColors = {"咨询":"#4f6df5","需求":"#ec4899","bug":"#ef4444","建议":"#14b8a6","开通试用":"#8b5cf6","未分类":"#94a3b8"};
+const srcColors = {"AI大模型":"#8b5cf6","关键词匹配":"#f59e0b","关键词(降级)":"#f97316","未匹配":"#ef4444"};
+
+async function loadInsights() {
+  const res = await fetch("/api/analytics/insights");
+  const d = await res.json();
+  if (!d.ok) return;
+
+  document.getElementById("insightsStats").innerHTML = `
+    <div class="stat-card"><div class="num">${d.total_requests}</div><div class="label">需求总数</div></div>
+    <div class="stat-card"><div class="num">${d.total_chats}</div><div class="label">问答总数</div></div>
+    <div class="stat-card"><div class="num">${d.top_orgs.length}</div><div class="label">活跃机构数</div></div>
+    <div class="stat-card"><div class="num" style="color:#ef4444">${d.gaps_count}</div><div class="label">未解答问题</div></div>`;
+
+  const maxOrg = Math.max(...d.top_orgs.map(x=>x.count), 1);
+  let orgHtml = d.top_orgs.slice(0, 10).map((o, i) => {
+    const types = Object.entries(o.types).map(([t,c])=>`<span class="type-tag type-${t}" style="margin-left:2px;font-size:10px">${t}:${c}</span>`).join("");
+    return `<div class="rank-item">
+      <div class="rank-num" style="background:${rankColors[i]||'#94a3b8'}">${i+1}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${o.count/maxOrg*100}%;background:${rankColors[i]||'#94a3b8'}"><span class="rank-label" style="color:#fff">${esc(o.org)}</span></div></div>
+      <span class="rank-count">${o.count}</span>
+    </div><div style="margin-left:32px;margin-bottom:6px">${types}</div>`;
+  }).join("");
+  document.getElementById("orgRanking").innerHTML = orgHtml || '<div class="empty">暂无数据</div>';
+
+  const totalReq = d.total_requests || 1;
+  let typeHtml = Object.entries(d.type_distribution).sort((a,b)=>b[1]-a[1]).map(([t, c]) => {
+    const pct = (c/totalReq*100).toFixed(0);
+    return `<div class="dist-row"><div class="dist-label">${esc(t)}</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${distColors[t]||'#94a3b8'}"></div></div>
+      <span class="dist-val">${c}</span></div>`;
+  }).join("");
+  document.getElementById("typeDist").innerHTML = typeHtml || '<div class="empty">暂无数据</div>';
+
+  let qHtml = d.top_questions.slice(0, 15).map((q, i) => {
+    return `<div class="rank-item">
+      <div class="rank-num" style="background:${rankColors[i]||'#94a3b8'}">${i+1}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(q.question.substring(0,50))}${q.question.length>50?"…":""}</div></div>
+      <span class="rank-count">${q.count}次</span>
+    </div>`;
+  }).join("");
+  document.getElementById("hotQuestions").innerHTML = qHtml || '<div class="empty">暂无数据</div>';
+
+  const totalChat = d.total_chats || 1;
+  let srcHtml = Object.entries(d.source_distribution).sort((a,b)=>b[1]-a[1]).map(([s, c]) => {
+    const pct = (c/totalChat*100).toFixed(0);
+    return `<div class="dist-row"><div class="dist-label">${esc(s)}</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${srcColors[s]||'#94a3b8'}"></div></div>
+      <span class="dist-val">${c}</span></div>`;
+  }).join("");
+  document.getElementById("sourceDist").innerHTML = srcHtml || '<div class="empty">暂无数据</div>';
+
+  const maxH = Math.max(...d.hourly_distribution.map(x=>x.count), 1);
+  document.getElementById("hourlyChart").innerHTML = d.hourly_distribution.map(h => `
+    <div class="bar-item"><div class="bar-val" style="font-size:10px">${h.count||""}</div>
+    <div class="bar" style="height:${h.count/maxH*100}px;min-width:12px;background:#6366f1"></div>
+    <div class="bar-label" style="font-size:9px">${h.hour.slice(0,2)}</div></div>`).join("");
+
+  const rt = d.response_time;
+  document.getElementById("responseTime").innerHTML = `
+    <div class="rt-item"><span>平均</span><span class="rt-val">${rt.avg}ms</span></div>
+    <div class="rt-item"><span>P50（中位数）</span><span class="rt-val">${rt.p50}ms</span></div>
+    <div class="rt-item"><span>P95（95分位）</span><span class="rt-val">${rt.p95}ms</span></div>
+    <div class="rt-item"><span>最快</span><span class="rt-val">${rt.min}ms</span></div>
+    <div class="rt-item"><span>最慢</span><span class="rt-val">${rt.max}ms</span></div>
+    <div class="rt-item" style="border:none"><span>样本数</span><span class="rt-val">${rt.count}</span></div>`;
+
+  document.getElementById("gapsCount").textContent = d.gaps_count;
+  let gapsHtml = d.knowledge_gaps.map(g => `<tr>
+    <td style="white-space:nowrap">${g.time}</td>
+    <td class="desc">${esc(g.question)}</td>
+    <td><span class="src-tag src-${esc(g.source)}">${esc(g.source)}</span></td>
+  </tr>`).join("");
+  document.getElementById("gapsTbody").innerHTML = gapsHtml || '<tr><td colspan="3" class="empty">暂无未解答问题，知识库覆盖良好</td></tr>';
+}
 
 loadDashboard();
 </script>

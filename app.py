@@ -651,6 +651,119 @@ def api_analytics_chat_logs_clear():
     save_chat_logs([])
     return jsonify({"ok": True, "message": "已清空"})
 
+# ============================================================
+# API - 数据分析（深度洞察）
+# ============================================================
+@app.route("/api/analytics/insights", methods=["GET"])
+def api_analytics_insights():
+    """深度数据分析：机构排行、热门问题、知识盲区、响应时间等"""
+    reqs = load_requests()
+    logs = load_chat_logs()
+
+    # --- 1. 机构需求排行 ---
+    org_count = {}
+    org_type = {}  # 每个机构的类型分布
+    for r in reqs:
+        org = r.get("org", "未填写") or "未填写"
+        org_count[org] = org_count.get(org, 0) + 1
+        if org not in org_type:
+            org_type[org] = {}
+        t = r.get("type", "未分类")
+        org_type[org][t] = org_type[org].get(t, 0) + 1
+    top_orgs = sorted([{"org": k, "count": v, "types": org_type[k]} for k, v in org_count.items()],
+                      key=lambda x: x["count"], reverse=True)[:20]
+
+    # --- 2. 热门问题排行 ---
+    # 归一化后分组统计
+    def norm_q(q):
+        q = q.lower().strip()
+        q = re.sub(r"[\s，。、！？,.!?~～\-_？吗呢啊的吧]", "", q)
+        return q
+    q_count = {}
+    q_examples = {}  # 保留一个原始问法示例
+    for l in logs:
+        u = l.get("user", "").strip()
+        if not u:
+            continue
+        nk = norm_q(u)
+        if nk not in q_count:
+            q_count[nk] = 0
+            q_examples[nk] = u
+        q_count[nk] += 1
+    top_questions = sorted([{"question": q_examples[k], "count": v} for k, v in q_count.items()],
+                           key=lambda x: x["count"], reverse=True)[:30]
+
+    # --- 3. 需求类型分布 ---
+    type_dist = {}
+    for r in reqs:
+        t = r.get("type", "未分类")
+        type_dist[t] = type_dist.get(t, 0) + 1
+
+    # --- 4. 问答来源分布 ---
+    source_dist = {}
+    source_labels = {"deepseek": "AI大模型", "keyword": "关键词匹配", "keyword_fallback": "关键词(降级)", "fallback": "未匹配"}
+    for l in logs:
+        s = source_labels.get(l.get("source", ""), l.get("source", "未知"))
+        source_dist[s] = source_dist.get(s, 0) + 1
+
+    # --- 5. 知识盲区：Bot没答出来的问题 ---
+    gaps = []
+    for l in logs:
+        if not l.get("matched", False):
+            gaps.append({
+                "question": l.get("user", ""),
+                "time": l.get("time", ""),
+                "source": l.get("source", ""),
+                "error": l.get("error", "")
+            })
+    gaps = list(reversed(gaps))[:50]  # 最新50条
+
+    # --- 6. 响应时间统计 ---
+    durations = [l.get("duration_ms", 0) for l in logs if l.get("duration_ms", 0) > 0]
+    if durations:
+        durations_sorted = sorted(durations)
+        n = len(durations_sorted)
+        response_time = {
+            "avg": round(sum(durations) / n),
+            "min": durations_sorted[0],
+            "max": durations_sorted[-1],
+            "p50": durations_sorted[n // 2],
+            "p95": durations_sorted[int(n * 0.95)] if n > 1 else durations_sorted[0],
+            "count": n
+        }
+    else:
+        response_time = {"avg": 0, "min": 0, "max": 0, "p50": 0, "p95": 0, "count": 0}
+
+    # --- 7. 需求状态分布 ---
+    status_dist = {}
+    for r in reqs:
+        s = r.get("status", "待处理")
+        status_dist[s] = status_dist.get(s, 0) + 1
+
+    # --- 8. 活跃时段分布 ---
+    hour_dist = {}
+    for l in logs:
+        t = l.get("time", "")
+        if len(t) >= 13:
+            h = t[11:13]
+            hour_dist[h] = hour_dist.get(h, 0) + 1
+    hourly = [{"hour": f"{h:02d}:00", "count": hour_dist.get(f"{h:02d}", 0)} for h in range(24)]
+
+    return jsonify({
+        "ok": True,
+        "top_orgs": top_orgs,
+        "top_questions": top_questions,
+        "type_distribution": type_dist,
+        "source_distribution": source_dist,
+        "knowledge_gaps": gaps,
+        "gaps_count": len(gaps),
+        "response_time": response_time,
+        "status_distribution": status_dist,
+        "hourly_distribution": hourly,
+        "total_requests": len(reqs),
+        "total_chats": len(logs)
+    })
+
 
 if __name__ == "__main__":
     if not os.path.exists(REQUESTS_FILE) or len(load_requests()) == 0:
